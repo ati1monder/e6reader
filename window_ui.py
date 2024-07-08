@@ -11,19 +11,20 @@
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
-    QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
+    QCursor, QFont, QFontDatabase, QGradient,
+    QIcon, QImage, QKeySequence, QLinearGradient,
+    QPainter, QPalette, QPixmap, QRadialGradient,
+    QTransform)
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLayout, QLineEdit,
-    QMainWindow, QMenuBar, QPushButton, QScrollArea,
-    QSizePolicy, QVBoxLayout, QWidget)
+    QMainWindow, QMenu, QMenuBar, QPushButton,
+    QScrollArea, QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_e6reader(object):
     def setupUi(self, e6reader):
         if not e6reader.objectName():
             e6reader.setObjectName(u"e6reader")
-        e6reader.resize(1150, 596)
+        e6reader.resize(1081, 634)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -33,13 +34,14 @@ class Ui_e6reader(object):
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayoutWidget = QWidget(self.centralwidget)
         self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 1081, 541))
+        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 1081, 561))
         self.MainLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.MainLayout.setObjectName(u"MainLayout")
         self.MainLayout.setSizeConstraint(QLayout.SizeConstraint.SetMinAndMaxSize)
         self.MainLayout.setContentsMargins(0, 0, 0, 0)
         self.searchLayout = QHBoxLayout()
         self.searchLayout.setObjectName(u"searchLayout")
+        self.searchLayout.setContentsMargins(6, 6, 6, -1)
         self.lineEdit = QLineEdit(self.verticalLayoutWidget)
         self.lineEdit.setObjectName(u"lineEdit")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
@@ -47,6 +49,8 @@ class Ui_e6reader(object):
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
         self.lineEdit.setSizePolicy(sizePolicy1)
+        self.lineEdit.setMinimumSize(QSize(0, 35))
+        self.lineEdit.setCursorMoveStyle(Qt.CursorMoveStyle.LogicalMoveStyle)
 
         self.searchLayout.addWidget(self.lineEdit)
 
@@ -68,7 +72,7 @@ class Ui_e6reader(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollWidgetImg = QWidget()
         self.scrollWidgetImg.setObjectName(u"scrollWidgetImg")
-        self.scrollWidgetImg.setGeometry(QRect(0, 0, 1075, 493))
+        self.scrollWidgetImg.setGeometry(QRect(0, 0, 1075, 507))
         self.scrollArea.setWidget(self.scrollWidgetImg)
 
         self.MainLayout.addWidget(self.scrollArea)
@@ -76,8 +80,12 @@ class Ui_e6reader(object):
         e6reader.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(e6reader)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1150, 30))
+        self.menubar.setGeometry(QRect(0, 0, 1081, 30))
+        self.menuMore = QMenu(self.menubar)
+        self.menuMore.setObjectName(u"menuMore")
         e6reader.setMenuBar(self.menubar)
+
+        self.menubar.addAction(self.menuMore.menuAction())
 
         self.retranslateUi(e6reader)
 
@@ -86,6 +94,9 @@ class Ui_e6reader(object):
 
     def retranslateUi(self, e6reader):
         e6reader.setWindowTitle(QCoreApplication.translate("e6reader", u"MainWindow", None))
+        self.lineEdit.setInputMask("")
+        self.lineEdit.setPlaceholderText(QCoreApplication.translate("e6reader", u"Enter what you want to search...", None))
         self.pushButton.setText(QCoreApplication.translate("e6reader", u"Search", None))
+        self.menuMore.setTitle(QCoreApplication.translate("e6reader", u"More", None))
     # retranslateUi
 

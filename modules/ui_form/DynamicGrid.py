@@ -1,3 +1,4 @@
+# deprecated
 from PySide6.QtWidgets import QGridLayout
 
 class DynamicGrid(QGridLayout):

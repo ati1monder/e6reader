@@ -4,9 +4,8 @@ from modules.workers import FetchPageWorker, ImageLoaderWorker
 from window import Ui_e6reader
 
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtCore import Slot, QThreadPool
-from PySide6.QtGui import Qt
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout
+from PySide6.QtCore import Slot, QThreadPool, Qt
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -20,8 +19,10 @@ class AppWindow(QMainWindow):
         self.ui.pushButton.clicked.connect(self.get_images_api)
         self.ui.lineEdit.returnPressed.connect(self.get_images_api)
 
-        self.threadpool = QThreadPool()
+        self.ui.scrollArea.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        self.threadpool = QThreadPool()
+        
         self.imgLayout = FlowLayout(self.ui.scrollWidgetImg, margin=10, hSpacing=10, vSpacing=10)
 
     @Slot()
@@ -67,7 +68,7 @@ class AppWindow(QMainWindow):
         print(error)
     
     def resizeEvent(self, event):
-        self.ui.scrollArea.setFixedSize(self.width(), self.height() - 30)
+        self.ui.scrollArea.setFixedSize(self.width(), self.height() - self.ui.searchLayout.contentsRect().height() - self.ui.menubar.height() - 10)
 
         QMainWindow.resizeEvent(self, event)
 
