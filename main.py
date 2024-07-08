@@ -1,11 +1,12 @@
-from modules import e6post, var
-from urllib.request import urlretrieve
+from modules import var
+from modules.ui_form import ImagePixmapLabel, DynamicGrid
+from modules.workers import FetchPageWorker, ImageLoaderWorker
 from window import Ui_e6reader
 
 import sys
-from PySide6.QtWidgets import QApplication, QGridLayout, QMainWindow, QLabel, QFrame
-from PySide6.QtCore import Slot, QThreadPool, QRunnable, Signal, QObject, SIGNAL
-from PySide6.QtGui import QPixmap, Qt
+from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtCore import Slot, QThreadPool
+from PySide6.QtGui import Qt
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -13,23 +14,20 @@ class AppWindow(QMainWindow):
         self.ui = Ui_e6reader()
         self.ui.setupUi(self)
         self.setWindowTitle('e6reader')
+        self.Image_List = []
 
         self.item_width = 150
 
-        self.ui.pushButton.clicked.connect(self.get_images)
-        self.ui.lineEdit.returnPressed.connect(self.get_images)
+        self.ui.pushButton.clicked.connect(self.get_images_api)
+        self.ui.lineEdit.returnPressed.connect(self.get_images_api)
 
         self.threadpool = QThreadPool()
 
-        self.imgGridLayout = QGridLayout(self.ui.scrollWidgetImg)
-    
-    def clearlayout(self, layout):
-        for i in range(layout.count()): 
-            self.imgGridLayout.itemAt(i).widget().deleteLater()
+        self.imgGridLayout = DynamicGrid(self.ui.scrollWidgetImg)
 
     @Slot()
-    def get_images(self):
-        self.clearlayout(self.imgGridLayout)
+    def get_images_api(self):
+        self.imgGridLayout.clearlayout()
         worker = FetchPageWorker(url=var.url, page=1, tags=self.ui.lineEdit.text().replace(' ', '+'), username=var.username, api=var.api)
         worker.signals.result.connect(self.handle_result)
         worker.signals.error.connect(self.handle_error)
@@ -38,22 +36,21 @@ class AppWindow(QMainWindow):
     @Slot(object)
     def image_loaded(self, data):
         path, row, col = data
-        image = QPixmap(path).scaled(self.item_width, self.item_width, Qt.AspectRatioMode.KeepAspectRatioByExpanding, Qt.TransformationMode.SmoothTransformation)
-        
-        image_label = ClickableLabel()
-        image_label.setFixedSize(self.item_width, self.item_width)
-        image_label.setPixmap(image)
 
+        image_label = ImagePixmapLabel()
+        image_label.appendImage(path)
+
+        self.Image_List.append(image_label)
         self.imgGridLayout.addWidget(image_label, row, col, alignment=Qt.AlignmentFlag.AlignCenter)
         image_label.clicked.connect(self.test_func)
     
     @Slot()
     def test_func(self):
-        print('a!')
-    
+        print(self.Image_List)
+
     @Slot(object)
     def handle_result(self, result):
-        self.clearlayout(self.imgGridLayout)
+        self.imgGridLayout.clearlayout()
 
         available_width = self.width()
         cols = max(1, available_width // self.item_width)
@@ -75,56 +72,6 @@ class AppWindow(QMainWindow):
         self.ui.scrollArea.setFixedSize(self.width(), self.height() - 30)
 
         QMainWindow.resizeEvent(self, event)
-
-class WorkerSignals(QObject):
-    result = Signal(object)
-    error = Signal(str)
-    image_loaded = Signal(object)
-
-class ImageLoaderWorker(QRunnable):
-    def __init__(self, sample, row, col):
-        super().__init__()
-        self.sample = sample
-        self.row = row
-        self.col = col
-        self.signals = WorkerSignals()
-    
-    def run(self):
-        try:
-            img_path = f'./cache/{self.sample["file"]["md5"]}.{self.sample["file"]["ext"]}'
-            urlretrieve(self.sample['sample']['url'], img_path)
-            self.signals.image_loaded.emit((img_path, self.row, self.col))
-        except Exception as err:
-            self.signals.error.emit(str(err))
-
-class FetchPageWorker(QRunnable):
-    def __init__(self, url, page, tags, username, api):
-        super().__init__()
-        self.url = url
-        self.page = page
-        self.tags = tags
-        self.username = username
-        self.api = api
-        self.res = []
-        self.signals = WorkerSignals()
-
-    def run(self):
-        try:
-            result = e6post.fetch_page(url=self.url, page=self.page, tags=self.tags, username=self.username, api=self.api)
-            self.signals.result.emit(result)
-        except Exception as e:
-            self.signals.error.emit(str(e))
-
-class ClickableLabel(QLabel):
-    clicked = Signal()
-
-    def __init__(self, parent = None):
-        super().__init__(parent)
-    
-    def mousePressEvent(self, event):
-        self.clicked.emit()
-        super().mousePressEvent(event)
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
