@@ -65,6 +65,7 @@ class FlowLayout(QLayout):
         self.itemList = list()
         self.m_hSpace = hSpacing
         self.m_vSpace = vSpacing
+        self.items = list()
 
         self.setContentsMargins(margin, margin, margin, margin)
 
@@ -103,6 +104,15 @@ class FlowLayout(QLayout):
             return self.itemList[index]
         else:
             return None
+        
+    def itemAppend(self, item):
+        self.items.append(item)
+    
+    def inLayout(self, object) -> bool:
+        if object in self.items:
+            return True
+        else:
+            return False
 
     def takeAt(self, index: int) -> typing.Union[QLayoutItem, None]:
         if 0 <= index < len(self.itemList):

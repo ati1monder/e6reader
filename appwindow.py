@@ -1,9 +1,9 @@
 from modules import var
-from modules.ui_form import ImagePixmapLabel, FlowLayout
+from modules.ui_form import ImagePixmapLabel, FlowLayout, LoadingAnimation
 from modules.workers import FetchPageWorker, ImageLoaderWorker
 from window import Ui_e6reader
 
-from PySide6.QtWidgets import QMainWindow
+from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSizePolicy
 from PySide6.QtCore import Slot, QThreadPool, Qt
 
 class AppWindow(QMainWindow):
@@ -13,52 +13,50 @@ class AppWindow(QMainWindow):
         self.ui.setupUi(self)
         self.setWindowTitle('e6reader')
 
-        self.item_width = 150
-
         self.ui.pushButton.clicked.connect(self.get_images_api)
         self.ui.lineEdit.returnPressed.connect(self.get_images_api)
 
         self.ui.scrollArea.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.ui.scrollArea.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         self.threadpool = QThreadPool()
         
         self.imgLayout = FlowLayout(self.ui.scrollWidgetImg, margin=10, hSpacing=10, vSpacing=10)
 
+        self.loadAnim = LoadingAnimation(self.ui.scrollArea)
+
     @Slot()
     def get_images_api(self):
+        self.loadAnim.start()
         self.imgLayout.clearlayout()
-        worker = FetchPageWorker(url=var.url, tags=self.ui.lineEdit.text().replace(' ', '+'), username=var.username, api=var.api)
+        worker = FetchPageWorker(url=var.url, page=1, tags=self.ui.lineEdit.text().replace(' ', '+'), username=var.username, api=var.api)
         worker.signals.result.connect(self.handle_result)
         worker.signals.error.connect(self.handle_error)
         self.threadpool.start(worker)
 
     @Slot(object)
     def image_loaded(self, data):
-        path, row, col = data
+        path = data
 
-        image_label = ImagePixmapLabel()
-        image_label.appendImage(path)
+        image_label = ImagePixmapLabel(path)
 
         # self.imgLayout.addWidget(image_label, row, col, alignment=Qt.AlignmentFlag.AlignCenter)
         self.imgLayout.addWidget(image_label)
+        self.imgLayout.itemAppend(image_label)
         image_label.clicked.connect(self.test_func)
     
     @Slot()
     def test_func(self):
-        print(self.Image_List)
+        value = self.sender()
+        print(self.imgLayout.inLayout(value))
+
 
     @Slot(object)
     def handle_result(self, result):
-        self.result = result
+        self.loadAnim.stop()
         self.imgLayout.clearlayout()
-
-        available_width = self.width()
-        cols = max(1, available_width // self.item_width)
-
-        for index, sample in enumerate(result[0]):
-            row = index // cols
-            col = index % cols
-            img_loader_worker = ImageLoaderWorker(sample, row, col)
+        for sample in result:
+            img_loader_worker = ImageLoaderWorker(sample)
             img_loader_worker.signals.image_loaded.connect(self.image_loaded)
             img_loader_worker.signals.error.connect(self.handle_error)
             self.threadpool.start(img_loader_worker)
@@ -68,6 +66,6 @@ class AppWindow(QMainWindow):
         print(error)
     
     def resizeEvent(self, event):
-        self.ui.scrollArea.setFixedSize(self.width(), self.height() - self.ui.searchLayout.contentsRect().height() - self.ui.menubar.height() - 10)
+        self.ui.scrollArea.setFixedSize(self.width(), self.height() - self.ui.searchLayout.contentsRect().height() - 15)
 
         QMainWindow.resizeEvent(self, event)

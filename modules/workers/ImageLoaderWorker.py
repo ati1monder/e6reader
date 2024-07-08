@@ -5,11 +5,9 @@ from urllib.request import urlretrieve
 from pathlib import Path
 
 class ImageLoaderWorker(QRunnable):
-    def __init__(self, sample, row, col):
+    def __init__(self, sample):
         super().__init__()
         self.sample = sample
-        self.row = row
-        self.col = col
         self.signals = WorkerSignals()
     
     def run(self):
@@ -18,7 +16,7 @@ class ImageLoaderWorker(QRunnable):
             img_path = f'./cache/{md5}.{self.sample["file"]["ext"]}'
             if Path(img_path).exists():
                 print(f'Preview ({md5}) already exists (cache)')
-                self.signals.image_loaded.emit((img_path, self.row, self.col))
+                self.signals.image_loaded.emit((img_path))
             else:
                 try:
                     print(f'Downloading preview... ({md5[5:]}...)')
@@ -26,6 +24,6 @@ class ImageLoaderWorker(QRunnable):
                     print(f'Downloaded successfully!... ({md5[5:]}...)')
                 except Exception as err:
                     self.signals.error.emit(str(err))
-                self.signals.image_loaded.emit((img_path, self.row, self.col))
+                self.signals.image_loaded.emit((img_path))
         except Exception as err:
             self.signals.error.emit(str(err))
