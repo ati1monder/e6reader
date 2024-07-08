@@ -18,9 +18,9 @@ class LoadingAnimation(QHBoxLayout):
         self.label.setMovie(self.movie)
     
     def start(self):
-        self.setEnabled(True)
+        self.label.setVisible(True)
         self.movie.start()
     
     def stop(self):
-        self.setEnabled(False)
-        self.movie.deleteLater()
+        self.movie.stop()
+        self.label.setVisible(False)
