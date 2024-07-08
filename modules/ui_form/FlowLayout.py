@@ -83,6 +83,12 @@ class FlowLayout(QLayout):
         else:
             return self.smartSpacing(QStyle.PM_LayoutHorizontalSpacing)
 
+    def clearlayout(self):
+        for i in reversed(range(self.count())):
+            widget = self.itemAt(i).widget()
+            if widget:
+                widget.deleteLater()
+
     def verticalSpacing(self) -> int:
         if self.m_vSpace >= 0:
             return self.m_vSpace
