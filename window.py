@@ -23,7 +23,7 @@ class Ui_e6reader(object):
     def setupUi(self, e6reader):
         if not e6reader.objectName():
             e6reader.setObjectName(u"e6reader")
-        e6reader.resize(1129, 596)
+        e6reader.resize(1150, 596)
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -76,7 +76,7 @@ class Ui_e6reader(object):
         e6reader.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(e6reader)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1129, 30))
+        self.menubar.setGeometry(QRect(0, 0, 1150, 30))
         e6reader.setMenuBar(self.menubar)
 
         self.retranslateUi(e6reader)

@@ -1,5 +1,5 @@
 from modules import var
-from modules.ui_form import ImagePixmapLabel, DynamicGrid
+from modules.ui_form import ImagePixmapLabel, FlowLayout
 from modules.workers import FetchPageWorker, ImageLoaderWorker
 from window import Ui_e6reader
 
@@ -14,7 +14,6 @@ class AppWindow(QMainWindow):
         self.ui = Ui_e6reader()
         self.ui.setupUi(self)
         self.setWindowTitle('e6reader')
-        self.Image_List = []
 
         self.item_width = 150
 
@@ -23,11 +22,11 @@ class AppWindow(QMainWindow):
 
         self.threadpool = QThreadPool()
 
-        self.imgGridLayout = DynamicGrid(self.ui.scrollWidgetImg)
+        self.imgLayout = FlowLayout(self.ui.scrollWidgetImg, margin=10, hSpacing=10, vSpacing=10)
 
     @Slot()
     def get_images_api(self):
-        self.imgGridLayout.clearlayout()
+        # self.imgLayout.clearlayout()
         worker = FetchPageWorker(url=var.url, page=1, tags=self.ui.lineEdit.text().replace(' ', '+'), username=var.username, api=var.api)
         worker.signals.result.connect(self.handle_result)
         worker.signals.error.connect(self.handle_error)
@@ -40,8 +39,8 @@ class AppWindow(QMainWindow):
         image_label = ImagePixmapLabel()
         image_label.appendImage(path)
 
-        self.Image_List.append(image_label)
-        self.imgGridLayout.addWidget(image_label, row, col, alignment=Qt.AlignmentFlag.AlignCenter)
+        # self.imgLayout.addWidget(image_label, row, col, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.imgLayout.addWidget(image_label)
         image_label.clicked.connect(self.test_func)
     
     @Slot()
@@ -50,7 +49,7 @@ class AppWindow(QMainWindow):
 
     @Slot(object)
     def handle_result(self, result):
-        self.imgGridLayout.clearlayout()
+        # self.imgLayout.clearlayout()
 
         available_width = self.width()
         cols = max(1, available_width // self.item_width)
@@ -58,7 +57,6 @@ class AppWindow(QMainWindow):
         for index, sample in enumerate(result):
             row = index // cols
             col = index % cols
-            print(sample['sample']['url'])
             img_loader_worker = ImageLoaderWorker(sample, row, col)
             img_loader_worker.signals.image_loaded.connect(self.image_loaded)
             img_loader_worker.signals.error.connect(self.handle_error)

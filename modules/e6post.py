@@ -3,6 +3,7 @@ from base64 import b64encode
 import json
 
 def fetch_page(url, page, limit = 70, tags = None, username = None, api = None) -> list:
+    print("Fetching API posts...")
     url_ = url + f'?tags={tags}&page={page}&limit={limit}'
     request_ = req.Request(url_, headers={
     'User-Agent': 'atimonder1/1.0',
@@ -10,6 +11,7 @@ def fetch_page(url, page, limit = 70, tags = None, username = None, api = None) 
     }, method='GET')
 
     with req.urlopen(request_) as res:
+        print('Loaded successfully!')
         return json.loads(res.read())['posts']
 
 def fetch_all(url, tags = None, username = None, api = None) -> list:
