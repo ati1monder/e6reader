@@ -34,15 +34,11 @@ class AppWindow(QMainWindow):
         worker.signals.error.connect(self.handle_error)
         self.threadpool.start(worker)
 
-    @Slot(object)
-    def image_loaded(self, data):
-        path = data
-
-        image_label = ImagePixmapLabel(path)
+    @Slot(str, object)
+    def image_loaded(self, path: str, image_label: ImagePixmapLabel):
+        image_label.addImage(path)
 
         # self.imgLayout.addWidget(image_label, row, col, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.imgLayout.addWidget(image_label)
-        self.imgLayout.itemAppend(image_label)
         image_label.clicked.connect(self.test_func)
     
     @Slot()
@@ -55,8 +51,13 @@ class AppWindow(QMainWindow):
     def handle_result(self, result):
         self.loadAnim.stop()
         self.imgLayout.clearlayout()
+
         for sample in result:
-            img_loader_worker = ImageLoaderWorker(sample)
+            image_label = ImagePixmapLabel()
+            self.imgLayout.addWidget(image_label)
+            self.imgLayout.itemAppend(image_label)
+
+            img_loader_worker = ImageLoaderWorker(sample, image_label)
             img_loader_worker.signals.image_loaded.connect(self.image_loaded)
             img_loader_worker.signals.error.connect(self.handle_error)
             self.threadpool.start(img_loader_worker)
