@@ -27,7 +27,7 @@ class ImagePixmapLabel(QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        painter.setBrush(QColor(66, 63, 63))
+        painter.setBrush(QColor('#C7C7C7'))
         painter.setPen(Qt.PenStyle.NoPen)
         rounded_rect = QPainterPath()
         rounded_rect.addRoundedRect(QRect(0, 0, self.item_width, self.item_width), self.radius, self.radius)

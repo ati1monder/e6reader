@@ -1,5 +1,5 @@
 from modules import var
-from modules.ui_form import ImagePixmapLabel, FlowLayout, LoadingAnimation
+from modules.ui_form import ImagePixmapLabel, FlowLayout, LoadingAnimation, InfoImageBox
 from modules.workers import FetchPageWorker, ImageLoaderWorker
 from window import Ui_e6reader
 
@@ -35,7 +35,7 @@ class AppWindow(QMainWindow):
         self.threadpool.start(worker)
 
     @Slot(str, object)
-    def image_loaded(self, path: str, image_label: ImagePixmapLabel):
+    def image_loaded(self, path: str, image_label: ImagePixmapLabel, info_image_box: InfoImageBox):
         image_label.addImage(path)
 
         # self.imgLayout.addWidget(image_label, row, col, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -54,10 +54,11 @@ class AppWindow(QMainWindow):
 
         for sample in result:
             image_label = ImagePixmapLabel()
-            self.imgLayout.addWidget(image_label)
-            self.imgLayout.itemAppend(image_label)
+            image_box = InfoImageBox(image_label)
+            self.imgLayout.addWidget(image_box)
+            self.imgLayout.itemAppend(image_box)
 
-            img_loader_worker = ImageLoaderWorker(sample, image_label)
+            img_loader_worker = ImageLoaderWorker(sample, image_label, image_box)
             img_loader_worker.signals.image_loaded.connect(self.image_loaded)
             img_loader_worker.signals.error.connect(self.handle_error)
             self.threadpool.start(img_loader_worker)
