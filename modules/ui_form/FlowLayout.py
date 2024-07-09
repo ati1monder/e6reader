@@ -3,6 +3,7 @@
 # This file taken from
 # https://code.qt.io/cgit/qt/qtbase.git/tree/examples/widgets/layouts/flowlayout/flowlayout.cpp?h=5.13
 # Modified/adapted by jon, 10/07/2019, to translate into Python/PyQt
+# Modified/adapted by atimonder1, 09/07/2024, to make widgets centered
 #
 # Copyright (C) 2016 The Qt Company Ltd.
 # Contact: https://www.qt.io/licensing/
@@ -161,27 +162,50 @@ class FlowLayout(QLayout):
         x = effectiveRect.x()
         y = effectiveRect.y()
         lineHeight = 0
+        rowItems = []
+        rowWidth = 0
+
+        spaceX = self.horizontalSpacing()
+        spaceY = self.verticalSpacing()
 
         for item in self.itemList:
             wid = item.widget()
-            spaceX = self.horizontalSpacing()
             if spaceX == -1:
                 spaceX = wid.style().layoutSpacing(QSizePolicy.PushButton, QSizePolicy.PushButton, Qt.Horizontal)
-            spaceY = self.verticalSpacing()
             if spaceY == -1:
                 spaceY = wid.style().layoutSpacing(QSizePolicy.PushButton, QSizePolicy.PushButton, Qt.Vertical)
 
             nextX = x + item.sizeHint().width() + spaceX
             if nextX - spaceX > effectiveRect.right() and lineHeight > 0:
+                totalRowWidth = rowWidth - spaceX
+                offset = (effectiveRect.width() - totalRowWidth) / 2
+                for rowItem in rowItems:
+                    rowItem[1].moveLeft(rowItem[1].left() + offset)
+                    if not testOnly:
+                        rowItem[0].setGeometry(rowItem[1])
+                rowItems.clear()
+                rowWidth = 0
+
                 x = effectiveRect.x()
                 y = y + lineHeight + spaceY
                 nextX = x + item.sizeHint().width() + spaceX
                 lineHeight = 0
 
+            rectItem = QRect(QPoint(x, y), item.sizeHint())
+            rowItems.append((item, rectItem))
+            rowWidth += item.sizeHint().width() + spaceX
+
             if not testOnly:
-                item.setGeometry(QRect(QPoint(x, y), item.sizeHint()))
-    
+                item.setGeometry(rectItem)
+
             x = nextX
             lineHeight = max(lineHeight, item.sizeHint().height())
+
+        totalRowWidth = rowWidth - spaceX
+        offset = (effectiveRect.width() - totalRowWidth) / 2
+        for rowItem in rowItems:
+            rowItem[1].moveLeft(rowItem[1].left() + offset)
+            if not testOnly:
+                rowItem[0].setGeometry(rowItem[1])
 
         return y + lineHeight - rect.y() + bottom

@@ -5,17 +5,16 @@ from urllib.request import urlretrieve
 from pathlib import Path
 
 class ImageLoaderWorker(QRunnable):
-    def __init__(self, sample, widget, image_box):
+    def __init__(self, sample, widget):
         super().__init__()
         self.sample = sample
         self.widget = widget
-        self.image_box = image_box
         self.md5 = self.sample["file"]["md5"]
         self.img_path = f'./cache/{self.md5}.{self.sample["file"]["ext"]}'
         self.signals = WorkerSignals()
 
     def emit_signal(self):
-        self.signals.image_loaded.emit(self.img_path, self.widget, self.image_box)
+        self.signals.image_loaded.emit(self.img_path, self.widget)
 
     def download(self):
         if Path(self.img_path).exists():

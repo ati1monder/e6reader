@@ -35,7 +35,7 @@ class AppWindow(QMainWindow):
         self.threadpool.start(worker)
 
     @Slot(str, object)
-    def image_loaded(self, path: str, image_label: ImagePixmapLabel, info_image_box: InfoImageBox):
+    def image_loaded(self, path: str, image_label: ImagePixmapLabel):
         image_label.addImage(path)
 
         # self.imgLayout.addWidget(image_label, row, col, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -43,8 +43,7 @@ class AppWindow(QMainWindow):
     
     @Slot()
     def test_func(self):
-        value = self.sender()
-        print(self.imgLayout.inLayout(value))
+        print(self.sender().parent().info)
 
 
     @Slot(object)
@@ -54,11 +53,11 @@ class AppWindow(QMainWindow):
 
         for sample in result:
             image_label = ImagePixmapLabel()
-            image_box = InfoImageBox(image_label)
+            image_box = InfoImageBox(image_label, sample)
             self.imgLayout.addWidget(image_box)
-            self.imgLayout.itemAppend(image_box)
+            self.imgLayout.itemAppend(image_label)
 
-            img_loader_worker = ImageLoaderWorker(sample, image_label, image_box)
+            img_loader_worker = ImageLoaderWorker(sample, image_label)
             img_loader_worker.signals.image_loaded.connect(self.image_loaded)
             img_loader_worker.signals.error.connect(self.handle_error)
             self.threadpool.start(img_loader_worker)
@@ -68,6 +67,6 @@ class AppWindow(QMainWindow):
         print(error)
     
     def resizeEvent(self, event):
-        self.ui.scrollArea.setFixedSize(self.width(), self.height() - self.ui.searchLayout.contentsRect().height() - 15)
+        self.ui.scrollArea.setFixedSize(self.width(), self.height() - self.ui.lineEdit.height())
 
         QMainWindow.resizeEvent(self, event)
