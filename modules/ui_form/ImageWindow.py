@@ -1,10 +1,11 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QSpacerItem, QLabel, QSizePolicy
 from PySide6.QtGui import QPixmap
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 
 class ImageWindow(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
+        self.path = None
         self.setMinimumSize(640, 450)
 
         self.verticalMainLayout = QVBoxLayout(self)
@@ -68,5 +69,15 @@ class ImageWindow(QWidget):
         self.listButtonLayout.addSpacerItem(self.horizSpacer2)
     
     def showPicture(self, path):
-        self.image = QPixmap(path).scaledToHeight(self.height() - 200, Qt.TransformationMode.SmoothTransformation)
-        self.imageLabel.setPixmap(self.image)
+        self.path = path
+        self.image = QPixmap(self.path)
+        self.updateImage()
+    
+    def updateImage(self):
+        if self.path:
+            img_size = QSize(self.width() - self.width()*0.1, self.height() - self.height()*0.2)
+            self.imageLabel.setPixmap(self.image.scaled(img_size, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+    
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.updateImage()

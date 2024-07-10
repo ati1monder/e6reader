@@ -5,6 +5,7 @@ from window import Ui_e6reader
 
 from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSizePolicy
 from PySide6.QtCore import Slot, QThreadPool, Qt
+from functools import partial
 
 class AppWindow(QMainWindow):
     def __init__(self):
@@ -37,20 +38,43 @@ class AppWindow(QMainWindow):
     @Slot(str, object)
     def preview_loaded(self, path: str, image_label: ImagePixmapLabel):
         image_label.addImage(path)
-        image_label.clicked.connect(self.test_func)
+        image_label.clicked.connect(self.photo_window)
     
     @Slot()
-    def test_func(self):
-        sample = self.sender().parent().info
+    def photo_window(self):
+        self.iteration_item = 1
+        print(self.imgLayout.items.index(self.sender().parent().object))
+        sample = self.sender().parent()
         self.test_window = ImageWindow()
         self.test_window.show()
-        image_loader = ImageLoaderWorker(sample, 'image', self.test_window)
+        image_loader = ImageLoaderWorker(sample.info, 'image', self.test_window)
         image_loader.signals.image_loaded.connect(self.image_loaded)
         self.threadpool.start(image_loader)
 
+        self.test_window.nextButton.clicked.connect(partial(self.list_pictures, ('next', sample)))
+        self.test_window.prevButton.clicked.connect(partial(self.list_pictures, ('prev', sample)))
+    
+    @Slot()
+    def list_pictures(self, data):
+        name, sender = data
+        current_index = self.imgLayout.items.index(sender.object)
+        current_item = None
+
+        if name == 'next':
+            current_item = self.imgLayout.items[current_index+self.iteration_item]
+            self.iteration_item = self.iteration_item + 1
+        elif name == 'prev':
+            current_item = self.imgLayout.items[current_index-1]
+            self.iteration_item = self.iteration_item - 1
+        
+        image_loader = ImageLoaderWorker(current_item.parent().info, 'image', self.test_window)
+        image_loader.signals.image_loaded.connect(self.image_loaded)
+        self.threadpool.start(image_loader)
+        self.sample = current_item.parent()
+        
+
     @Slot(str, object)
     def image_loaded(self, path, widget: ImageWindow):
-        print('working!')
         widget.showPicture(path)
 
     @Slot(object)
