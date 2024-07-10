@@ -3,3 +3,5 @@ modules/var.py
 cache
 window.ui
 test.py
+window_ui.py
+image_widget*

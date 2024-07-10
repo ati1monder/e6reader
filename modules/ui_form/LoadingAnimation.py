@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QHBoxLayout, QSpacerItem, QLabel, QSizePolicy
 from PySide6.QtGui import QMovie
+from PySide6.QtCore import QSize
 
 class LoadingAnimation(QHBoxLayout):
     def __init__(self, parent = None):
@@ -15,6 +16,7 @@ class LoadingAnimation(QHBoxLayout):
         self.addItem(self.right_spacer)
 
         self.movie = QMovie('./assets/loading.gif')
+        self.movie.setScaledSize(QSize(64, 64))
         self.label.setMovie(self.movie)
     
     def start(self):

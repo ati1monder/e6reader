@@ -1,4 +1,4 @@
-from ..workers.WorkerSignals import WorkerSignals
+from .WorkerSignals import WorkerSignals
 
 from PySide6.QtCore import QRunnable
 from urllib.request import urlretrieve

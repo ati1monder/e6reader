@@ -3,7 +3,7 @@ from modules.ui_form import ImagePixmapLabel, FlowLayout, LoadingAnimation, Info
 from modules.workers import FetchPageWorker, ImageLoaderWorker
 from window import Ui_e6reader
 
-from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSizePolicy
+from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSizePolicy, QWidget
 from PySide6.QtCore import Slot, QThreadPool, Qt
 
 class AppWindow(QMainWindow):

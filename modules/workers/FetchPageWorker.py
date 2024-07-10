@@ -1,7 +1,7 @@
 from .. import e6post
 
 from PySide6.QtCore import QRunnable
-from ..workers.WorkerSignals import WorkerSignals
+from .WorkerSignals import WorkerSignals
 
 class FetchPageWorker(QRunnable):
     def __init__(self, url, page, tags, username, api):
