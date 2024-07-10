@@ -17,6 +17,7 @@ class FetchPageWorker(QRunnable):
     def run(self):
         try:
             result = e6post.fetch_page(url=self.url, page=self.page, tags=self.tags, username=self.username, api=self.api)
+            print(result[0])
             self.signals.result.emit(result)
         except Exception as e:
             self.signals.error.emit(str(e))

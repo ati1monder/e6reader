@@ -1,9 +1,9 @@
 from modules import var
-from modules.ui_form import ImagePixmapLabel, FlowLayout, LoadingAnimation, InfoImageBox
+from modules.ui_form import ImagePixmapLabel, FlowLayout, LoadingAnimation, InfoImageBox, ImageWindow
 from modules.workers import FetchPageWorker, ImageLoaderWorker
 from window import Ui_e6reader
 
-from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSizePolicy, QWidget
+from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSizePolicy
 from PySide6.QtCore import Slot, QThreadPool, Qt
 
 class AppWindow(QMainWindow):
@@ -35,16 +35,23 @@ class AppWindow(QMainWindow):
         self.threadpool.start(worker)
 
     @Slot(str, object)
-    def image_loaded(self, path: str, image_label: ImagePixmapLabel):
+    def preview_loaded(self, path: str, image_label: ImagePixmapLabel):
         image_label.addImage(path)
-
-        # self.imgLayout.addWidget(image_label, row, col, alignment=Qt.AlignmentFlag.AlignCenter)
         image_label.clicked.connect(self.test_func)
     
     @Slot()
     def test_func(self):
-        print(self.sender().parent().info)
+        sample = self.sender().parent().info
+        self.test_window = ImageWindow()
+        self.test_window.show()
+        image_loader = ImageLoaderWorker(sample, 'image', self.test_window)
+        image_loader.signals.image_loaded.connect(self.image_loaded)
+        self.threadpool.start(image_loader)
 
+    @Slot(str, object)
+    def image_loaded(self, path, widget: ImageWindow):
+        print('working!')
+        widget.showPicture(path)
 
     @Slot(object)
     def handle_result(self, result):
@@ -57,8 +64,8 @@ class AppWindow(QMainWindow):
             self.imgLayout.addWidget(image_box)
             self.imgLayout.itemAppend(image_label)
 
-            img_loader_worker = ImageLoaderWorker(sample, image_label)
-            img_loader_worker.signals.image_loaded.connect(self.image_loaded)
+            img_loader_worker = ImageLoaderWorker(sample, 'preview', image_label)
+            img_loader_worker.signals.preview_loaded.connect(self.preview_loaded)
             img_loader_worker.signals.error.connect(self.handle_error)
             self.threadpool.start(img_loader_worker)
             
